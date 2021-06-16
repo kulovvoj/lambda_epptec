@@ -3,9 +3,7 @@ package eu.epptec.lambda;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.util.Arrays.stream;
 
@@ -23,37 +21,58 @@ public class Lambda {
                 new Person("Zdenek", "Kulovany", 63)
         };
 
-        // Count the number of people named "Tomas"
+        // --------------------------------------------
+        // 1) Count the number of people named "Tomas"
+        // --------------------------------------------
         long tomasCount = stream(people).filter(person -> person.getFirstName().equals("Tomas")).count();
         System.out.println(tomasCount);
         System.out.println();
 
-        // Get an array of unique last names
-        String[] uniqueLastNames = stream(people).map(person -> person.getLastName()).distinct().toArray(String[]::new);
-        System.out.println(Arrays.toString(uniqueLastNames));System.out.println();
+        // --------------------------------------------
+        // 2) Get an array of unique last names
+        // --------------------------------------------
+        String[] uniqueLastNames = stream(people).map(Person::getLastName).distinct().toArray(String[]::new);
+        System.out.println(Arrays.toString(uniqueLastNames));
+        System.out.println();
 
-        // Count the sum of people's age
-        int ageSum = stream(people).map(person -> person.getAge()).reduce(0, (acc, age) -> acc + age);
+        // --------------------------------------------
+        // 3) Count the sum of people's age
+        // --------------------------------------------
+        int ageSum = stream(people).map(Person::getAge).reduce(0, (acc, age) -> acc + age);
         System.out.println(ageSum);
         System.out.println();
 
-        // Group people to map by name
-        Map<String, List<Person>> firstNameMap
+        // --------------------------------------------
+        // 4) Group people to map by name
+        // --------------------------------------------
+
+        // First solution
+        /* Map<String, List<Person>> firstNameMap
                 = stream(people).collect(
                         Collectors.toMap(Person::getFirstName,
                             person -> Stream.of(person).collect(Collectors.toList()),
                             (existing, replacement)
-                                    -> Stream.concat(existing.stream(), replacement.stream()).collect(Collectors.toList())));
+                                    -> Stream.concat(existing.stream(), replacement.stream()).collect(Collectors.toList()))); */
 
-        // Printing using nested forEach (wanted to try it)
-        // firstNameMap.forEach((name, personList)
-        //     -> personList.forEach(person -> System.out.println("[" + name + " -> " + person.toString() + "]")));
+        // Second solution
+        Map<String, List<Person>> firstNameMap
+                = stream(people).collect(Collectors.groupingBy(Person::getFirstName));
 
-        firstNameMap.entrySet().forEach(entry -> System.out.println(entry.getKey() + " -> " + entry.getValue().toString()));
+        firstNameMap.forEach((name, personList) -> System.out.println(name + " -> " + personList.toString()));
         System.out.println();
 
-        // Group people to Map<String, Map<String, List<Person>>> by first name first and last name second
-        System.out.println();
+        // --------------------------------------------
+        // 5) Group people to Map<String, Map<String, List<Person>>>
+        // by first name first and last name second
+        // --------------------------------------------
+
+        Map<String, Map<String, List<Person>>> fullNameMap
+                = stream(people).collect(Collectors.groupingBy(Person::getFirstName, Collectors.groupingBy(Person::getLastName)));
+
+        fullNameMap.forEach((firstName, lastNameMap)
+                -> { System.out.println(firstName);
+                    lastNameMap.forEach((lastName, personList)
+                    -> System.out.println(" -> " + lastName + " -> " + personList.toString()));});
 
     }
 }
