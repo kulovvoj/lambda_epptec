@@ -23,7 +23,7 @@ public class Lambda {
         // Get an array of unique last names
         System.out.println(Arrays.toString(stream(people).map(person -> person.lastName).distinct().toArray(String[]::new)));
         // Count the sum of people's age
-        System.out.println();
+        System.out.println(stream(people).map(person -> person.age).reduce(0, (acc, age) -> acc + age));// Group people to map by name
         // Group people to map by name
         System.out.println();
         // Group people to Map<String, Map<String, List,<Person>>> by first name first and last name second
